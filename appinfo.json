@@ -1,0 +1,14 @@
+{
+  "uuid": "cf59151f-4dff-4221-a109-7dde3377545c",
+  "shortName": "rl_route",
+  "longName": "Pebble Route",
+  "companyName": "Remus Lazar",
+  "versionCode": 1,
+  "versionLabel": "1.0.0",
+  "watchapp": {
+    "watchface": false
+  },
+  "resources": {
+    "media": []
+  }
+}
