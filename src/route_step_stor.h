@@ -1,4 +1,5 @@
 #define MAX_ITEMS 128
+#define DISTANCE_MAX_LEN 16
 
 // Haltestelle
 struct RouteStep {
@@ -9,6 +10,8 @@ struct RouteStep {
 // Liste aller Haltestellen
 struct RouteSteps {
   int count;
+	int current_step;
+	char current_distance[DISTANCE_MAX_LEN];
   struct RouteStep data[MAX_ITEMS];
 };
 

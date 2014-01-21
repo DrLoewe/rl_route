@@ -19,21 +19,30 @@ void in_dropped_handler(AppMessageResult reason, void *context) {
 
 void in_received_handler(DictionaryIterator *received, void *context) {
   Tuple *tuple;
-  tuple = dict_find(received, APPMESSAGE_KEY_ROUTESTEP_INDEX);
-  if (tuple) {
+  if ( (tuple = dict_find(received, APPMESSAGE_KEY_ROUTESTEP_INDEX)) ) {
 
     // purge the stor if first element received
     if (tuple->value->int8 == 0)
       route_step_stor_purge(route_step_stor);
-
+		
     route_step_stor_add(route_step_stor, received);
-  }
-
-  if (!route_steps_window_is_loaded()) {
-    route_steps_window_show();
-  } else {
-    route_steps_window_reload_data();
-  }
+		
+		if (!route_steps_window_is_loaded()) {
+			window_stack_pop_all(false);
+			route_steps_window_show();
+		} else {
+			route_steps_window_reload_data();
+		}
+		
+  } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_INDEX)) ) {
+		route_step_stor->current_step = tuple->value->int8;
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "current route step index: %d", route_step_stor->current_step);
+		if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_DISTANCE)) ) {
+			strncpy(route_step_stor->current_distance, tuple->value->cstring, tuple->length);
+		}
+		route_steps_window_update();
+	}
+	
 }
 
 void out_sent_handler(DictionaryIterator *sent, void *context) {

@@ -21,8 +21,8 @@ void route_step_stor_add(struct RouteSteps *stor, DictionaryIterator *received) 
     stor->data[stor->count].instructions = (char*)malloc(instructions->length);
     strncpy(stor->data[stor->count].instructions, instructions->value->cstring, instructions->length);
 
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "%s",
-	    stor->data[stor->count].distance);
+    /* APP_LOG(APP_LOG_LEVEL_DEBUG, "%s", */
+	  /*   stor->data[stor->count].distance); */
     stor->count++;
   }
 }
