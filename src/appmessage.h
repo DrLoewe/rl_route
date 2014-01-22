@@ -6,10 +6,12 @@ enum {
   APPMESSAGE_KEY_UPDATE_INDEX, // index of the current step
   APPMESSAGE_KEY_UPDATE_DISTANCE, // remaining distance in current step
   APPMESSAGE_KEY_UPDATE_TOTAL_DISTANCE, // remaining total distance to destination
+  APPMESSAGE_KEY_UPDATE_ALERT, // alert the user
 };
 
 // AppMessage action keys
 enum {
-  APPMESSAGE_REQUEST_ROUTE,
+  APPMESSAGE_REQUEST_GET_ROUTE,
+  APPMESSAGE_REQUEST_REROUTE,
 };
 

@@ -9,6 +9,12 @@
     "watchface": false
   },
   "resources": {
-    "media": []
+    "media": [
+      {
+        "type": "png",
+        "name": "LOCATION_ARROW",
+        "file": "location_arrow.png"
+      }      
+    ]
   }
 }

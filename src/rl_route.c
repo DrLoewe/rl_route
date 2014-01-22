@@ -20,42 +20,63 @@ void in_dropped_handler(AppMessageResult reason, void *context) {
 void in_received_handler(DictionaryIterator *received, void *context) {
   Tuple *tuple;
   if ( (tuple = dict_find(received, APPMESSAGE_KEY_ROUTESTEP_INDEX)) ) {
-
+    
     // purge the stor if first element received
     if (tuple->value->int8 == 0)
       route_step_stor_purge(route_step_stor);
 		
     route_step_stor_add(route_step_stor, received);
 		
-		if (!route_steps_window_is_loaded()) {
-			window_stack_pop_all(false);
-			route_steps_window_show();
-		} else {
-			route_steps_window_reload_data();
-		}
+    if (!route_steps_window_is_loaded()) {
+      window_stack_pop_all(false);
+      route_steps_window_show();
+    } else {
+      route_steps_window_reload_data();
+    }
 		
   } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_INDEX)) ) {
-		route_step_stor->current_step = tuple->value->int8;
-		//		APP_LOG(APP_LOG_LEVEL_DEBUG, "current route step index: %d", route_step_stor->current_step);
-		if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_DISTANCE)) ) {
-			strncpy(route_step_stor->current_distance, tuple->value->cstring, DISTANCE_MAX_LEN);
-		}
-		if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_TOTAL_DISTANCE)) ) {
-			strncpy(route_step_stor->total_distance, tuple->value->cstring, DISTANCE_MAX_LEN);
-		}
-		route_steps_window_update();
-	}
+    route_step_stor->current_step = tuple->value->int8;
+    //		APP_LOG(APP_LOG_LEVEL_DEBUG, "current route step index: %d", route_step_stor->current_step);
+    if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_DISTANCE)) ) {
+      strncpy(route_step_stor->current_distance, tuple->value->cstring, DISTANCE_MAX_LEN);
+    }
+    if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_TOTAL_DISTANCE)) ) {
+      strncpy(route_step_stor->total_distance, tuple->value->cstring, DISTANCE_MAX_LEN);
+    }
+    route_steps_window_update();
+
+  } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_ALERT)) ) {
+    if (tuple->value->int8) {
+      vibes_long_pulse();
+    }
+    
+  }
 	
 }
 
 void out_sent_handler(DictionaryIterator *sent, void *context) {
   // outgoing message was delivered
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "appmessage sent ok");
+  //  APP_LOG(APP_LOG_LEVEL_DEBUG, "appmessage sent ok");
 }
 
 void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
   // outgoing message failed
   APP_LOG(APP_LOG_LEVEL_DEBUG, "appmessage sent FAILED!");
+}
+
+void send_appmessage_request(int request) {
+  //  APP_LOG(APP_LOG_LEVEL_DEBUG, "trying to send an appmessage ..");
+  // request the route name from ios app
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  Tuplet value = TupletInteger(request, 1);
+  dict_write_tuplet(iter, &value);
+  app_message_outbox_send();
+}
+
+// long click on the select button, perform a reroute
+void send_request() {
+  send_appmessage_request(APPMESSAGE_REQUEST_REROUTE);
 }
 
 static void init(void) {
@@ -67,8 +88,8 @@ static void init(void) {
   // init the storage for the route steps
   route_step_stor = route_step_stor_create();
 
-  // init the route steps window
-  route_steps_window_init(route_step_stor);
+  // init the route steps window with the route_step stor and the callback fn
+  route_steps_window_init(route_step_stor, send_request);
 
   // AppMessage Settings and Constants
   // AppMessage OUT: action (1byte) + value (1byte) = 1 + 2*7 + 1 + 1 = 17 bytes buffer size
@@ -85,15 +106,7 @@ static void init(void) {
   app_message_register_inbox_dropped(in_dropped_handler);
   app_message_register_inbox_received(in_received_handler);
   app_message_register_outbox_sent(out_sent_handler);
-  app_message_register_outbox_failed(out_failed_handler);
-  
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "trying to send an appmessage ..");
-  // request the route name from ios app
-  DictionaryIterator *iter;
-  app_message_outbox_begin(&iter);
-  Tuplet value = TupletInteger(APPMESSAGE_REQUEST_ROUTE, 0);
-  dict_write_tuplet(iter, &value);
-  app_message_outbox_send();
+  app_message_register_outbox_failed(out_failed_handler);  
 }
 
 static void deinit(void) {

@@ -2,13 +2,20 @@
 #include <route_steps_window.h>
 
 static struct RouteSteps *route_steps;
+static SendRequestCallback request_callback;
 
 static struct RouteStepsWindowUi {
   Window *window;
   MenuLayer *detail_menu_layer;
   TextLayer *status_text_layer; // status text on the bottom
   //  char status_string[32]; // status string for it
+  GBitmap *location_arrow_bitmap;
 } ui;
+
+// perform a scroll to the current position on list (according to the user location / GPS)
+static void menu_scroll_to_current_location() {
+  menu_layer_set_selected_index(ui.detail_menu_layer, (MenuIndex) { .row = route_steps->current_step, .section = 0 }, MenuRowAlignCenter, true);
+}
 
 // With this, you can dynamically add and remove sections
 static uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data) {
@@ -44,13 +51,11 @@ static void route_step_cell_draw(GContext* ctx, const Layer *cell_layer, MenuInd
 		     NULL);
 
   if (cell_index->row == route_steps->current_step) {
-    graphics_draw_text(ctx,
-		       "*",
-		       fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD),
-		       GRect(100,-2,42,44),
-		       GTextOverflowModeWordWrap,
-		       GTextAlignmentRight,
-		       NULL);		
+    graphics_draw_bitmap_in_rect(
+				 ctx,
+				 ui.location_arrow_bitmap,
+				 GRect(124,6,17,17)
+				 );
   }
 }
 
@@ -87,7 +92,13 @@ void route_steps_window_reload_data(void) {
 
 // Here we capture when a user selects a menu item
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-  //  departure_detail_show(&route_steps->data[cell_index->row], ui.selected_station_name);
+  menu_scroll_to_current_location();  
+}
+
+// Here we capture when a user performs a long click on the select button
+static void menu_select_longclick_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+  // call a request for recalculating the route to iOS
+  request_callback();
 }
 
 static void window_load(Window *window) {
@@ -119,6 +130,7 @@ static void window_load(Window *window) {
 	.get_cell_height = menu_get_cell_height_callback,
 	.draw_row = menu_draw_row_callback,
 	.select_click = menu_select_callback,
+	.select_long_click = menu_select_longclick_callback,
 	});
 
   // Bind the menu layer's click config provider to the window for interactivity
@@ -127,6 +139,9 @@ static void window_load(Window *window) {
   // Add the layers to the window for display
   layer_add_child(window_layer, menu_layer_get_layer(ui.detail_menu_layer));
   layer_add_child(window_layer, text_layer_get_layer(ui.status_text_layer));
+
+  // bitmaps
+  ui.location_arrow_bitmap = gbitmap_create_with_resource(RESOURCE_ID_LOCATION_ARROW);
 }
 
 static void window_unload(Window *window) {
@@ -134,6 +149,7 @@ static void window_unload(Window *window) {
   // Destroy the menu layer and Bitmap
   menu_layer_destroy(ui.detail_menu_layer);
   text_layer_destroy(ui.status_text_layer);
+  gbitmap_destroy(ui.location_arrow_bitmap);
 }
 
 void route_steps_window_show() {
@@ -142,7 +158,8 @@ void route_steps_window_show() {
   window_stack_push(ui.window, animated);
 }
 
-void route_steps_window_init(struct RouteSteps *stor) {
+void route_steps_window_init(struct RouteSteps *stor, SendRequestCallback cb) {
+  request_callback = cb;
   route_steps = stor;
 
   ui.window = window_create();
@@ -163,8 +180,8 @@ bool route_steps_window_is_loaded() {
 void route_steps_window_update(void) {
   //  snprintf(ui.status_string, sizeof(ui.status_string), ">| %s", route_steps->total_distance);
   //  text_layer_set_text(ui.status_text_layer, ui.status_string);
-
+  
   text_layer_set_text(ui.status_text_layer, route_steps->total_distance);
   menu_layer_reload_data(ui.detail_menu_layer);
-  menu_layer_set_selected_index(ui.detail_menu_layer, (MenuIndex) { .row = route_steps->current_step, .section = 0 }, MenuRowAlignCenter, true);
+  menu_scroll_to_current_location();
 }
