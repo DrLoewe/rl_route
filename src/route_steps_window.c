@@ -6,6 +6,8 @@ static struct RouteSteps *route_steps;
 static struct RouteStepsWindowUi {
   Window *window;
   MenuLayer *detail_menu_layer;
+  TextLayer *status_text_layer; // status text on the bottom
+  //  char status_string[32]; // status string for it
 } ui;
 
 // With this, you can dynamically add and remove sections
@@ -60,7 +62,7 @@ static int16_t menu_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *c
 						     GTextOverflowModeWordWrap,
 						     GTextAlignmentLeft
 						     );
-  return size.h + (cell_index->row == 0 ? 0 : 30);
+  return size.h + (cell_index->row == 0 ? 4 : 30);
 }
 
 // This is the menu item draw callback where you specify what each item should look like
@@ -93,8 +95,22 @@ static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);  
   GRect bounds = layer_get_bounds(window_layer);
 
+#define STATUS_BAR_HEIGHT 14
+#define STATUS_BAR_OFFSET 0
+
+  // Create the bottom status bar layer
+  ui.status_text_layer = text_layer_create((GRect) {
+      .origin = { 0, bounds.size.h-STATUS_BAR_HEIGHT+STATUS_BAR_OFFSET },
+	.size = { bounds.size.w, STATUS_BAR_HEIGHT } });
+  //  text_layer_set_font(ui.status_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD));
+  text_layer_set_text_alignment(ui.status_text_layer, GTextAlignmentCenter);
+  text_layer_set_background_color(ui.status_text_layer, GColorBlack);
+  text_layer_set_text_color(ui.status_text_layer, GColorWhite);
+
   // Create the menu layer
-  ui.detail_menu_layer = menu_layer_create(bounds);
+  ui.detail_menu_layer = menu_layer_create((GRect) {
+      .origin = { 0, 0 },
+	.size = { bounds.size.w, bounds.size.h-STATUS_BAR_HEIGHT } });
   
   // Set all the callbacks for the menu layer
   menu_layer_set_callbacks(ui.detail_menu_layer, NULL, (MenuLayerCallbacks){
@@ -108,14 +124,16 @@ static void window_load(Window *window) {
   // Bind the menu layer's click config provider to the window for interactivity
   menu_layer_set_click_config_onto_window(ui.detail_menu_layer, window);
   
-  // Add it to the window for display
+  // Add the layers to the window for display
   layer_add_child(window_layer, menu_layer_get_layer(ui.detail_menu_layer));
+  layer_add_child(window_layer, text_layer_get_layer(ui.status_text_layer));
 }
 
 static void window_unload(Window *window) {
 
   // Destroy the menu layer and Bitmap
   menu_layer_destroy(ui.detail_menu_layer);
+  text_layer_destroy(ui.status_text_layer);
 }
 
 void route_steps_window_show() {
@@ -143,6 +161,10 @@ bool route_steps_window_is_loaded() {
 }
 
 void route_steps_window_update(void) {
+  //  snprintf(ui.status_string, sizeof(ui.status_string), ">| %s", route_steps->total_distance);
+  //  text_layer_set_text(ui.status_text_layer, ui.status_string);
+
+  text_layer_set_text(ui.status_text_layer, route_steps->total_distance);
   menu_layer_reload_data(ui.detail_menu_layer);
   menu_layer_set_selected_index(ui.detail_menu_layer, (MenuIndex) { .row = route_steps->current_step, .section = 0 }, MenuRowAlignCenter, true);
 }

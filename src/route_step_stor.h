@@ -10,8 +10,9 @@ struct RouteStep {
 // Liste aller Haltestellen
 struct RouteSteps {
   int count;
-	int current_step;
-	char current_distance[DISTANCE_MAX_LEN];
+  int current_step;
+  char total_distance[DISTANCE_MAX_LEN];
+  char current_distance[DISTANCE_MAX_LEN];
   struct RouteStep data[MAX_ITEMS];
 };
 

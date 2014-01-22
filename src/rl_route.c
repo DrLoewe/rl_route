@@ -36,9 +36,12 @@ void in_received_handler(DictionaryIterator *received, void *context) {
 		
   } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_INDEX)) ) {
 		route_step_stor->current_step = tuple->value->int8;
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "current route step index: %d", route_step_stor->current_step);
+		//		APP_LOG(APP_LOG_LEVEL_DEBUG, "current route step index: %d", route_step_stor->current_step);
 		if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_DISTANCE)) ) {
-			strncpy(route_step_stor->current_distance, tuple->value->cstring, tuple->length);
+			strncpy(route_step_stor->current_distance, tuple->value->cstring, DISTANCE_MAX_LEN);
+		}
+		if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_TOTAL_DISTANCE)) ) {
+			strncpy(route_step_stor->total_distance, tuple->value->cstring, DISTANCE_MAX_LEN);
 		}
 		route_steps_window_update();
 	}
