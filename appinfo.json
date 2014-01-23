@@ -14,6 +14,11 @@
         "type": "png",
         "name": "LOCATION_ARROW",
         "file": "location_arrow.png"
+      },
+      {
+        "type": "png",
+        "name": "IPHONE_ROUTE",
+        "file": "iphone_route.png"
       }      
     ]
   }
