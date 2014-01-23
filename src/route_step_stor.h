@@ -1,5 +1,6 @@
 #define MAX_ITEMS 128
 #define DISTANCE_MAX_LEN 16
+#define TOTAL_DISTANCE_MAX_LEN 40 // longer string, e.g. "Remaining distance: .."
 
 // Haltestelle
 struct RouteStep {
@@ -11,7 +12,7 @@ struct RouteStep {
 struct RouteSteps {
   int count;
   int current_step;
-  char total_distance[DISTANCE_MAX_LEN];
+  char total_distance[TOTAL_DISTANCE_MAX_LEN];
   char current_distance[DISTANCE_MAX_LEN];
   struct RouteStep data[MAX_ITEMS];
 };

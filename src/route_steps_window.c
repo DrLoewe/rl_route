@@ -31,17 +31,15 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t secti
 static void route_step_cell_draw(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, const char *distance, const char *instructions) {
   graphics_context_set_text_color(ctx, GColorBlack);
   int y = 0;
-  if (cell_index->row > 0) {
-    graphics_draw_text(ctx,
-		       distance,
-		       fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD),  
-		       GRect(0,-2,144,24),
-		       GTextOverflowModeWordWrap,  
-		       GTextAlignmentLeft,  
-		       NULL);
-    y += 24;
-  }
-	
+  graphics_draw_text(ctx,
+		     distance,
+		     fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD),  
+		     GRect(0,-2,144,24),
+		     GTextOverflowModeWordWrap,  
+		     GTextAlignmentLeft,  
+		     NULL);
+  y += 24;
+  
   graphics_draw_text(ctx,
 		     instructions,
 		     fonts_get_system_font(FONT_KEY_GOTHIC_24),  
@@ -49,7 +47,7 @@ static void route_step_cell_draw(GContext* ctx, const Layer *cell_layer, MenuInd
 		     GTextOverflowModeWordWrap,  
 		     GTextAlignmentLeft,  
 		     NULL);
-
+  
   if (cell_index->row == route_steps->current_step) {
     graphics_draw_bitmap_in_rect(
 				 ctx,
@@ -67,7 +65,7 @@ static int16_t menu_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *c
 						     GTextOverflowModeWordWrap,
 						     GTextAlignmentLeft
 						     );
-  return size.h + (cell_index->row == 0 ? 4 : 30);
+  return size.h + 30;
 }
 
 // This is the menu item draw callback where you specify what each item should look like
@@ -106,14 +104,14 @@ static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);  
   GRect bounds = layer_get_bounds(window_layer);
 
-#define STATUS_BAR_HEIGHT 14
+#define STATUS_BAR_HEIGHT 16
 #define STATUS_BAR_OFFSET 0
 
   // Create the bottom status bar layer
   ui.status_text_layer = text_layer_create((GRect) {
       .origin = { 0, bounds.size.h-STATUS_BAR_HEIGHT+STATUS_BAR_OFFSET },
 	.size = { bounds.size.w, STATUS_BAR_HEIGHT } });
-  //  text_layer_set_font(ui.status_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD));
+  text_layer_set_font(ui.status_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
   text_layer_set_text_alignment(ui.status_text_layer, GTextAlignmentCenter);
   text_layer_set_background_color(ui.status_text_layer, GColorBlack);
   text_layer_set_text_color(ui.status_text_layer, GColorWhite);

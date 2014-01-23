@@ -41,17 +41,15 @@ void in_received_handler(DictionaryIterator *received, void *context) {
       strncpy(route_step_stor->current_distance, tuple->value->cstring, DISTANCE_MAX_LEN);
     }
     if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_TOTAL_DISTANCE)) ) {
-      strncpy(route_step_stor->total_distance, tuple->value->cstring, DISTANCE_MAX_LEN);
+      strncpy(route_step_stor->total_distance, tuple->value->cstring, TOTAL_DISTANCE_MAX_LEN);
     }
     route_steps_window_update();
 
   } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_ALERT)) ) {
-    if (tuple->value->int8) {
+    if (tuple->value->int8 == 1) {
       vibes_long_pulse();
-    }
-    
+    } 
   }
-	
 }
 
 void out_sent_handler(DictionaryIterator *sent, void *context) {
@@ -107,6 +105,9 @@ static void init(void) {
   app_message_register_inbox_received(in_received_handler);
   app_message_register_outbox_sent(out_sent_handler);
   app_message_register_outbox_failed(out_failed_handler);  
+
+  // get the current route if available
+  send_appmessage_request(APPMESSAGE_REQUEST_GET_ROUTE);
 }
 
 static void deinit(void) {
