@@ -7,6 +7,7 @@ enum {
   APPMESSAGE_KEY_UPDATE_DISTANCE, // remaining distance in current step
   APPMESSAGE_KEY_UPDATE_TOTAL_DISTANCE, // remaining total distance to destination
   APPMESSAGE_KEY_UPDATE_ALERT, // alert the user
+	APPMESSAGE_KEY_READY, // iOS app is ready
 };
 
 // AppMessage action keys

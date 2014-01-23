@@ -10,11 +10,19 @@
 static Window *window;
 static struct RouteSteps *route_step_stor;
 
-void in_dropped_handler(AppMessageResult reason, void *context) {
-  // incoming message dropped
-#ifdef DEBUG
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "dropped, reason: %d", reason);
-#endif
+void send_appmessage_request(int request) {
+  //  APP_LOG(APP_LOG_LEVEL_DEBUG, "trying to send an appmessage ..");
+  // request the route name from ios app
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  Tuplet value = TupletInteger(request, 1);
+  dict_write_tuplet(iter, &value);
+  app_message_outbox_send();
+}
+
+// long click on the select button, perform a reroute
+void send_request() {
+  send_appmessage_request(APPMESSAGE_REQUEST_REROUTE);
 }
 
 void in_received_handler(DictionaryIterator *received, void *context) {
@@ -49,7 +57,20 @@ void in_received_handler(DictionaryIterator *received, void *context) {
     if (tuple->value->int8 == 1) {
       vibes_long_pulse();
     } 
+
+  } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_READY)) ) {
+		// get the current route
+		send_appmessage_request(APPMESSAGE_REQUEST_GET_ROUTE);
   }
+}
+
+/*
+
+void in_dropped_handler(AppMessageResult reason, void *context) {
+  // incoming message dropped
+#ifdef DEBUG
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "dropped, reason: %d", reason);
+#endif
 }
 
 void out_sent_handler(DictionaryIterator *sent, void *context) {
@@ -61,21 +82,7 @@ void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, voi
   // outgoing message failed
   APP_LOG(APP_LOG_LEVEL_DEBUG, "appmessage sent FAILED!");
 }
-
-void send_appmessage_request(int request) {
-  //  APP_LOG(APP_LOG_LEVEL_DEBUG, "trying to send an appmessage ..");
-  // request the route name from ios app
-  DictionaryIterator *iter;
-  app_message_outbox_begin(&iter);
-  Tuplet value = TupletInteger(request, 1);
-  dict_write_tuplet(iter, &value);
-  app_message_outbox_send();
-}
-
-// long click on the select button, perform a reroute
-void send_request() {
-  send_appmessage_request(APPMESSAGE_REQUEST_REROUTE);
-}
+*/
 
 static void init(void) {
   // display the "waiting for data.." window and start the communication
@@ -100,11 +107,13 @@ static void init(void) {
 #define APP_MESSAGE_INBOX_SIZE 512
 
   app_message_open(APP_MESSAGE_INBOX_SIZE, APP_MESSAGE_OUTBOX_SIZE);
-
-  app_message_register_inbox_dropped(in_dropped_handler);
   app_message_register_inbox_received(in_received_handler);
+
+	/*
   app_message_register_outbox_sent(out_sent_handler);
   app_message_register_outbox_failed(out_failed_handler);  
+  app_message_register_inbox_dropped(in_dropped_handler);
+	*/
 
   // get the current route if available
   send_appmessage_request(APPMESSAGE_REQUEST_GET_ROUTE);
