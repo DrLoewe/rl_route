@@ -39,10 +39,16 @@ void in_received_handler(DictionaryIterator *received, void *context) {
       window_stack_pop_all(false);
       route_steps_window_show();
     } else {
-      route_steps_window_reload_data();
+			if (tuple->value->int8 == 0) {
+				route_steps_window_update(true); // go the first step if new route
+			} else {
+				route_steps_window_reload_data();
+			}
     }
 		
   } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_INDEX)) ) {
+		int old_step = route_step_stor->current_step;
+
     route_step_stor->current_step = tuple->value->int8;
     //		APP_LOG(APP_LOG_LEVEL_DEBUG, "current route step index: %d", route_step_stor->current_step);
     if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_DISTANCE)) ) {
@@ -51,7 +57,7 @@ void in_received_handler(DictionaryIterator *received, void *context) {
     if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_TOTAL_DISTANCE)) ) {
       strncpy(route_step_stor->total_distance, tuple->value->cstring, TOTAL_DISTANCE_MAX_LEN);
     }
-    route_steps_window_update();
+    route_steps_window_update(old_step != route_step_stor->current_step);
 
   } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_ALERT)) ) {
     if (tuple->value->int8 == 1) {

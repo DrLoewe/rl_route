@@ -7,5 +7,5 @@ void route_steps_window_show(void);
 void route_steps_window_deinit(void);
 void route_steps_window_reload_data(void);
 bool route_steps_window_is_loaded(void);
-void route_steps_window_update(void);
+void route_steps_window_update(bool current_step_changed);
 

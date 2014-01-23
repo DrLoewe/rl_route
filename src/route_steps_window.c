@@ -175,11 +175,11 @@ bool route_steps_window_is_loaded() {
   return window_is_loaded(ui.window);
 }
 
-void route_steps_window_update(void) {
+void route_steps_window_update(bool current_step_changed) {
   //  snprintf(ui.status_string, sizeof(ui.status_string), ">| %s", route_steps->total_distance);
   //  text_layer_set_text(ui.status_text_layer, ui.status_string);
   
   text_layer_set_text(ui.status_text_layer, route_steps->total_distance);
   menu_layer_reload_data(ui.detail_menu_layer);
-  menu_scroll_to_current_location();
+	if (current_step_changed) menu_scroll_to_current_location();
 }
