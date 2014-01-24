@@ -47,10 +47,9 @@ void in_received_handler(DictionaryIterator *received, void *context) {
     }
 		
   } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_INDEX)) ) {
-		int old_step = route_step_stor->current_step;
-
+    int old_step = route_step_stor->current_step;
+		
     route_step_stor->current_step = tuple->value->int8;
-    //		APP_LOG(APP_LOG_LEVEL_DEBUG, "current route step index: %d", route_step_stor->current_step);
     if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_DISTANCE)) ) {
       strncpy(route_step_stor->current_distance, tuple->value->cstring, DISTANCE_MAX_LEN);
     }
@@ -58,12 +57,14 @@ void in_received_handler(DictionaryIterator *received, void *context) {
       strncpy(route_step_stor->total_distance, tuple->value->cstring, TOTAL_DISTANCE_MAX_LEN);
     }
     route_steps_window_update(old_step != route_step_stor->current_step);
-
-  } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_ALERT)) ) {
-    if (tuple->value->int8 == 1) {
-      vibes_short_pulse();
-    } 
-
+    
+    if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_ALERT)) ) {
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", tuple->value->int8);
+      if (tuple->value->int8 == 1) {
+	vibes_short_pulse();
+      }
+    }
+    
   } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_READY)) ) {
 		// get the current route
 		send_appmessage_request(APPMESSAGE_REQUEST_GET_ROUTE);
