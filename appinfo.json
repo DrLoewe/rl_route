@@ -1,6 +1,6 @@
 {
   "uuid": "cf59151f-4dff-4221-a109-7dde3377545c",
-  "shortName": "rl_route",
+  "shortName": "Pebble Route",
   "longName": "Pebble Route",
   "companyName": "Remus Lazar",
   "versionCode": 1,
@@ -19,6 +19,12 @@
         "type": "png",
         "name": "IPHONE_ROUTE",
         "file": "iphone_route.png"
+      },
+      {
+        "menuIcon": true,
+        "type": "png",
+        "name": "APP_ICON",
+        "file": "app_icon.png"
       }      
     ]
   }

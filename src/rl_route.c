@@ -61,7 +61,7 @@ void in_received_handler(DictionaryIterator *received, void *context) {
 
   } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_ALERT)) ) {
     if (tuple->value->int8 == 1) {
-      vibes_long_pulse();
+      vibes_short_pulse();
     } 
 
   } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_READY)) ) {
