@@ -39,11 +39,11 @@ void in_received_handler(DictionaryIterator *received, void *context) {
       window_stack_pop_all(false);
       route_steps_window_show();
     } else {
-			if (tuple->value->int8 == 0) {
-				route_steps_window_update(true); // go the first step if new route
-			} else {
-				route_steps_window_reload_data();
-			}
+      if (tuple->value->int8 == 0) {
+	route_steps_window_update(true); // go the first step if new route
+      } else {
+	route_steps_window_reload_data();
+      }
     }
 		
   } else if ( (tuple = dict_find(received, APPMESSAGE_KEY_UPDATE_INDEX)) ) {
